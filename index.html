@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FastBoot</title>
+    <link rel="stylesheet" href="./css/main.css" />
+    <link rel="stylesheet" href="./css/demo.css" />
+  </head>
+  <body>
+    <div class="border w-full h-40 flex items-center justify-center">
+      <a href="javascript:start();" class="relative px-6 py-3 font-bold text-black group">
+        <span
+          class="absolute inset-0 w-full h-full transition duration-300 ease-out transform -translate-x-2 -translate-y-2 bg-red-300 group-hover:translate-x-0 group-hover:translate-y-0"
+        ></span>
+        <span
+          class="absolute inset-0 w-full h-full border-4 border-black"
+        ></span>
+        <span class="relative">启动</span>
+      </a>
+    </div>
+    <script>
+      function start() {
+        const {protocol,hostname,} = window.location
+        const url = `${protocol}//${hostname}:3000`
+        fetch(url + "/start", {
+          method: "POST",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Success:", data);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+    </script>
+  </body>
+</html>
