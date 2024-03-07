@@ -4,25 +4,152 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FastBoot</title>
-    <link rel="stylesheet" href="./css/main.css" />
-    <link rel="stylesheet" href="./css/demo.css" />
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+      }
+      html {
+        background-color: #fcfcfa;
+      }
+      .box {
+        left: 50%;
+        top: 50%;
+        border-radius: 12px;
+        position: absolute;
+        display: inline-block;
+        padding: 50px 80px;
+        border: 1px solid #e2e2e2;
+        transform: translate(-50%, -50%);
+      }
+      .panel {
+        display: flex;
+        padding: 6px;
+        justify-content: center;
+        position: relative;
+        background-color: rgb(214, 214, 214);
+        border-radius: 12px;
+        box-shadow: rgba(0, 0, 0, 0.15) 2px 3px 2px 0px inset;
+      }
+      .btn-body {
+        width: 60px;
+        height: 130px;
+        position: relative;
+        cursor: pointer;
+        background: linear-gradient(
+          rgb(255, 255, 255) 0%,
+          rgb(250, 246, 242) 15.7374%,
+          rgb(179, 179, 179) 86.2162%,
+          rgb(171, 171, 171) 101.802%
+        );
+      }
+      .btn-topLine,
+      .btn-bottomLine {
+        position: absolute;
+        transition: all 0.5s ease-in-out;
+      }
+      .btn-bg {
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        filter: blur(1px);
+        border: 1px solid #d6d6d6;
+        transition: all 0.5s ease-in-out;
+        background: linear-gradient(
+          rgb(242, 241, 240) 0%,
+          rgb(235, 233, 232) 100%
+        );
+      }
+      .btn-topLine {
+        top: 12px;
+        z-index: 1;
+        width: 100%;
+        border-top: 4px solid rgba(255, 255, 255, 0.7);
+        height: calc(100% - 16px);
+        filter: blur(1);
+        position: absolute;
+      }
+      .btn-bottomLine {
+        height: 0;
+        z-index: 1;
+        bottom: -1px;
+        width: 100%;
+        filter: blur(2);
+        position: absolute;
+        background-color: #d1cfcf;
+      }
+      .btn-point {
+        width: 8px;
+        height: 8px;
+        z-index: 1;
+        left: 50%;
+        top: 30px;
+        position: absolute;
+        border-radius: 50%;
+        background-color: #67c23a;
+        transform: translate(-50%, -50%);
+        transition: all 0.5s ease-in-out;
+      }
+      .btn-left .btn-topLine {
+        border-top-left-radius: 12px;
+        background: linear-gradient(
+          270deg,
+          rgb(238, 238, 238) 0%,
+          rgba(238, 238, 238, 0.88) 88.0279%,
+          rgb(255, 255, 255) 100%
+        );
+        border-bottom: 1px solid #ebe9e8;
+      }
+      .btn-right .btn-topLine {
+        border-top-right-radius: 12px;
+        border-bottom: 1px solid #ebe9e8;
+      }
+
+      .btn-click .btn-point {
+        top: 12px;
+        background-color: #cfcfcf;
+      }
+      .btn-click .btn-topLine {
+        top: -5px;
+        opacity: 0;
+      }
+      .btn-click .btn-bg {
+        box-shadow: rgba(0, 0, 0, 0.1) 7px 11px 12px 0px,
+          rgba(0, 0, 0, 0.15) 4px 4px 4px 0px;
+        background: linear-gradient(
+          rgb(235, 233, 232) 0%,
+          rgb(242, 241, 240) 100%
+        );
+      }
+      .btn-click .btn-bottomLine {
+        height: 12px;
+      }
+
+      p {
+        font-weight: bold;
+        color: #616060;
+        margin-bottom: 8px;
+      }
+      .disable {
+        cursor: no-drop !important;
+      }
+    </style>
   </head>
   <body>
-    <div class="border w-full h-40 flex items-center justify-center">
-      <a href="javascript:start();" class="relative px-6 py-3 font-bold text-black group">
-        <span
-          class="absolute inset-0 w-full h-full transition duration-300 ease-out transform -translate-x-2 -translate-y-2 bg-red-300 group-hover:translate-x-0 group-hover:translate-y-0"
-        ></span>
-        <span
-          class="absolute inset-0 w-full h-full border-4 border-black"
-        ></span>
-        <span class="relative">启动</span>
-      </a>
+    <div class="box">
+      <div class="panel">
+        <div class="btn-body" onclick="start()">
+          <div class="btn-topLine"></div>
+          <div class="btn-point"></div>
+          <div class="btn-bottomLine"></div>
+          <div class="btn-bg"></div>
+        </div>
+      </div>
     </div>
     <script>
       function start() {
-        const {protocol,hostname,} = window.location
-        const url = `${protocol}//${hostname}:3000`
+        const { protocol, hostname } = window.location;
+        const url = `${protocol}//${hostname}:3000`;
         fetch(url + "/start", {
           method: "POST",
         })
@@ -34,6 +161,52 @@
             console.error("Error:", error);
           });
       }
+      function getState() {
+        const { protocol, hostname } = window.location;
+        const url = `${protocol}//${hostname}:3000`;
+        return new Promise((resolve, reject) => {
+          fetch(url + "/getState", {
+            method: "POST",
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              resolve(data);
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              reject(error);
+            });
+        });
+      }
+      var isAction = false;
+      const btns = document.querySelectorAll(".btn-body");
+      const texts = document.querySelectorAll("p");
+
+      [...btns].map((e, i) => {
+        const timer = setInterval(async () => {
+          const { msg } = await getState();
+          isAction = msg;
+          if (isAction) {
+            e.classList.remove("btn-click");
+            e.classList.add("disable");
+          } else {
+            e.classList.add("btn-click");
+            e.classList.remove("disable");
+          }
+        }, 1000);
+
+        e.onclick = () => {
+          if (isAction) return 0;
+          isAction = !isAction;
+          isAction
+            ? e.classList.remove("btn-click")
+            : e.classList.add("btn-click");
+          var audio = new Audio("./audio/tap.wav");
+          audio.playbackRate = 1.8;
+          audio.play();
+          getState();
+        };
+      });
     </script>
   </body>
 </html>
